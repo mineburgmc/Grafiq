@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.14"
+    id("maven-publish")
 }
 
 group = "nl.mineburg.grafiq"
@@ -15,6 +16,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("com.clickhouse:client-v2:0.9.0")
     implementation("org.reflections:reflections:0.10.2")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 tasks.withType<Jar> {
