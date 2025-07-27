@@ -3,6 +3,8 @@
 Grafiq is a Java analytics/event tracking library for ClickHouse, designed for easy mapping of Java records to ClickHouse tables. It supports automatic table creation, type mapping, and batch or single event tracking.
 Originally made for the Mineburg server, but since we're nice we've opensourced it!
 
+[![](https://jitpack.io/v/mineburgmc/Grafiq.svg)](https://jitpack.io/#mineburgmc/Grafiq)
+
 ## Features
 
 - **Automatic Table Creation:** Annotate your analytic records and Grafiq will create the corresponding ClickHouse tables.
@@ -16,6 +18,68 @@ Originally made for the Mineburg server, but since we're nice we've opensourced 
 *The library runs on Java 17*
 
 ### Installation
+*Latest release is on the top of the page on the tag*
+
+#### Gradle (Groovy)
+
+Add the JitPack repository to your `build.gradle`:
+
+```gradle
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+
+Add the dependency:
+
+```gradle
+dependencies {
+    implementation 'com.github.mineburgmc:Grafiq:LATEST_RELEASE'
+}
+```
+
+#### Gradle (Kotlin DSL)
+
+Add the JitPack repository to your `build.gradle.kts`:
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+```
+
+Add the dependency:
+
+```kotlin
+dependencies {
+    implementation("com.github.mineburgmc:Grafiq:LATEST_RELEASE")
+}
+```
+
+#### Maven
+
+Add the JitPack repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+Add the dependency:
+
+```xml
+<dependency>
+    <groupId>com.github.mineburgmc</groupId>
+    <artifactId>Grafiq</artifactId>
+    <version>LATEST_RELEASE</version>
+</dependency>
+```
+
+
 ### Usage
 *Check the JUnit tests for more accurate code.*
 
