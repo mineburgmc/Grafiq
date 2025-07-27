@@ -17,6 +17,11 @@ dependencies {
     implementation("org.reflections:reflections:0.10.2")
 }
 
+tasks.withType<Jar> {
+    archiveBaseName.set("grafiq")
+    archiveVersion.set(version.toString())
+}
+
 tasks.test {
     useJUnitPlatform()
 }
