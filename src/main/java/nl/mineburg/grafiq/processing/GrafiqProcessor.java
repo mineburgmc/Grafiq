@@ -93,10 +93,13 @@ public class GrafiqProcessor {
 
     public void createTable(String query, String table, Class<?> clazz) {
         tableQueue.offer(() -> {
-            clickhouseClient.execute(query).thenAccept((action) -> {
+            try {
+                clickhouseClient.execute(query).get(); // do not blame me for this, I just have to ensure the table is made ;((
                 TableSchema schema = clickhouseClient.getTableSchema(table);
                 clickhouseClient.register(clazz, schema);
-            });
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create table: " + table, e);
+            }
         });
     }
 
