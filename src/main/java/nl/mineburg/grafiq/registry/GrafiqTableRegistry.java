@@ -70,11 +70,7 @@ public class GrafiqTableRegistry {
         query.append(String.join(", ", definitions));
 
         query.append(") ENGINE = MergeTree() ORDER BY created_at");
-
-        client.clickhouseClient().execute(query.toString()).thenAccept((action) -> {
-            TableSchema schema = client.clickhouseClient().getTableSchema(table);
-            client.clickhouseClient().register(clazz, schema);
-        });
+        client.processor().createTable(query.toString(), table, clazz);
     }
 
     /**

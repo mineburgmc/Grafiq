@@ -3,9 +3,11 @@ package nl.mineburg.grafiq;
 import com.clickhouse.client.api.Client;
 import com.clickhouse.client.api.insert.InsertSettings;
 import lombok.Getter;
+import lombok.Setter;
 import nl.mineburg.grafiq.annotation.GrafiqAnalytic;
 import nl.mineburg.grafiq.annotation.processor.GrafiqAnalyticProcessor;
 import nl.mineburg.grafiq.interfaces.GrafiqInterface;
+import nl.mineburg.grafiq.processing.GrafiqProcessor;
 import nl.mineburg.grafiq.registry.GrafiqTableRegistry;
 import nl.mineburg.grafiq.registry.GrafiqTypeRegistry;
 import nl.mineburg.grafiq.utils.RecordMatchingStrategy;
@@ -26,19 +28,20 @@ public class GrafiqClient {
     @Getter // This only really exists because I want the interface to also support tracking, lazy me :DD
     private static GrafiqClient instance;
 
-    private final Client clickhouseClient;
+    private final GrafiqProcessor processor;
     private final GrafiqTypeRegistry typeRegistry;
     private final GrafiqTableRegistry tableRegistry;
     private final GrafiqAnalyticProcessor analyticProcessor;
 
     private GrafiqClient(Client.Builder builder) {
-        this.clickhouseClient = builder
+        this.processor = GrafiqProcessor.of(this, () -> builder
                 .columnToMethodMatchingStrategy(RecordMatchingStrategy.INSTANCE)
-                .build();
+                .build());
         this.typeRegistry = GrafiqTypeRegistry.create();
         this.tableRegistry = GrafiqTableRegistry.of(this);
         this.analyticProcessor = GrafiqAnalyticProcessor.of(this);
 
+        processor.process();
         instance = this;
     }
 
@@ -58,10 +61,9 @@ public class GrafiqClient {
      * Accepts a variable number of events and delegates to {@link #track(List)}.
      *
      * @param events the analytic events to track
-     * @param <T>    the type of analytic event
      */
     @SafeVarargs
-    public final <T> void track(T... events) {
+    public final <T extends Record> void track(T... events) {
         this.track(List.of(events));
     }
 
@@ -71,31 +73,11 @@ public class GrafiqClient {
      * Groups events by class, validates annotations and interfaces, and inserts them into ClickHouse.
      *
      * @param events the list of analytic events to track
-     * @param <T>    the type of analytic event
      * @throws IllegalArgumentException if an event class is missing required annotations or interfaces
      */
-    public final <T> void track(List<T> events) {
+    public final void track(List<? extends Record> events) {
         if (events.isEmpty()) return;
-
-        Map<Class<?>, List<T>> grouped = new HashMap<>();
-        for (T event : events) {
-            grouped.computeIfAbsent(event.getClass(), k -> new ArrayList<>()).add(event);
-        }
-
-        for (Map.Entry<Class<?>, List<T>> entry : grouped.entrySet()) {
-            Class<?> clazz = entry.getKey();
-            if (!clazz.isAnnotationPresent(GrafiqAnalytic.class)) {
-                throw new IllegalArgumentException("Missing @GrafiqAnalytic on: " + clazz.getName());
-            }
-
-            if (!GrafiqInterface.class.isAssignableFrom(clazz)) {
-                throw new IllegalArgumentException("Missing GrafiqInterface on: " + clazz.getName() + ", " +
-                        "did you forget to implement it?");
-            }
-
-            String table = tableRegistry.table(clazz);
-            clickhouseClient.insert(table, entry.getValue(), new InsertSettings());
-        }
+        processor.queue().addAll(events);
     }
 
     /**
@@ -111,7 +93,7 @@ public class GrafiqClient {
      * Shuts down the ClickHouse client and releases resources.
      */
     public void shutdown() {
-        clickhouseClient.close();
+        processor.shutdown();
     }
 
 }

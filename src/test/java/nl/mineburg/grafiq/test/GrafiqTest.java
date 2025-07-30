@@ -41,6 +41,9 @@ public class GrafiqTest {
         // Easiest processing example, be aware that the instance has to be made before this works!!
         TestAnalytic.of(UUID.randomUUID(), "Pretty easy huh?").track();
 
+        // Since Grafiq runs on another thread, we gotta do some waiting until it's done here until proper testing is implemented, quick and dirty fix. Sorry guys :((
+        Thread.sleep(3000);
+
         // Be sure to shut down after you're done!
         client.shutdown();
     }

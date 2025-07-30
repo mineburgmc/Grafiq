@@ -29,8 +29,9 @@ public interface GrafiqInterface {
     default void track() {
         GrafiqClient client = GrafiqClient.instance();
         if (client == null) return; // Too bored to handle errors, just make the instance goddammit.
+        if (!(this instanceof Record)) return;
 
-        client.track(this);
+        client.track((Record) this);
     }
 
 }
