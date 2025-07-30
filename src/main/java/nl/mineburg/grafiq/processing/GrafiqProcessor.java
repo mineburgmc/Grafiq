@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class GrafiqProcessor {
 
-    private GrafiqClient client;
+    private final GrafiqClient client;
     private Client clickhouseClient;
     private final ScheduledExecutorService executor;
     private final Supplier<Client> clientSupplier;
